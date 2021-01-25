@@ -4,8 +4,8 @@ module.exports = {
     browser: true,
     node: true,
   },
+  parser: 'babel-eslint',
   parserOptions: {
-    parser: 'babel-eslint',
     ecmaVersion: 2018,
     sourceType: 'module',
   },
@@ -14,5 +14,10 @@ module.exports = {
   // add your custom rules here
   rules: {
     'react/prop-types': 1,
+    semi: 0,
+    // suppress errors for missing 'import React' in files
+    'react/react-in-jsx-scope': 'off',
+    'jsx-quotes': [2, 'prefer-single'],
+    quotes: [2, 'single'],
   },
-};
+}
