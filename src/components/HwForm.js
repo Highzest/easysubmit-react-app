@@ -147,7 +147,7 @@ const HwForm = () => {
       <div className='flex justify-center'>
         <button
           type='submit'
-          className='relative flex justify-center w-full px-2 py-1 mb-2 text-sm font-medium leading-4 text-purple-200 transition duration-150 ease-in-out bg-purple-800 border border-transparent rounded-md hover:bg-purple-500 focus:outline-none'
+          className='relative flex justify-center w-full px-2 py-1 mb-2 text-sm font-medium leading-4  hover:text-white text-purple-200 transition duration-150 ease-in-out bg-purple-800 border border-transparent rounded-md hover:bg-purple-500 focus:outline-none'
         >
           Generate Link
         </button>

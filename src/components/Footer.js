@@ -2,7 +2,7 @@ import logo from '../assets/fav.ico'
 
 const Footer = () => {
   return (
-    <div className='bg-purple-200 '>
+    <div className='bg-purple-200'>
       <footer className='text-gray-800 body-font'>
         <div className='container flex flex-col flex-wrap px-24 py-12 mx-auto md:items-center lg:items-start md:flex-row md:flex-no-wrap'>
           <div className='flex-shrink-0 w-32 mx-auto mt-10 text-center md:mx-0 md:text-left md:mt-0 '>
