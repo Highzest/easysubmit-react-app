@@ -145,10 +145,3 @@ const QuizForm = () => {
 }
 
 export default QuizForm
-/*
-{questions.map((index) => (
-        <div key={index}>
-          
-        </div>
-      ))}
-*/

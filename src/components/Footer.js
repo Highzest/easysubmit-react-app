@@ -24,17 +24,17 @@ const Footer = () => {
               </h2>
               <nav className='mb-10 list-none'>
                 <li>
-                  <a className='text-sm text-gray-600 hover:text-purple-700'>
+                  <a className='text-sm text-gray-600 hover:text-purple-700 hover:underline'>
                     Company
                   </a>
                 </li>
                 <li>
-                  <a className='text-sm text-gray-600 hover:text-purple-700'>
+                  <a className='text-sm text-gray-600 hover:text-purple-700 hover:underline'>
                     News
                   </a>
                 </li>
                 <li>
-                  <a className='text-sm text-gray-600 hover:text-purple-700'>
+                  <a className='text-sm text-gray-600 hover:text-purple-700 hover:underline'>
                     Policies
                   </a>
                 </li>
@@ -46,17 +46,17 @@ const Footer = () => {
               </h2>
               <nav className='mb-10 list-none'>
                 <li>
-                  <a className='text-sm text-gray-600 hover:text-purple-700'>
+                  <a className='text-sm text-gray-600 hover:text-purple-700 hover:underline'>
                     Facebook
                   </a>
                 </li>
                 <li>
-                  <a className='text-sm text-gray-600 hover:text-purple-700'>
+                  <a className='text-sm text-gray-600 hover:text-purple-700 hover:underline'>
                     Instagram
                   </a>
                 </li>
                 <li>
-                  <a className='text-sm text-gray-600 hover:text-purple-700'>
+                  <a className='text-sm text-gray-600 hover:text-purple-700 hover:underline'>
                     Twitter
                   </a>
                 </li>
@@ -68,12 +68,12 @@ const Footer = () => {
               </h2>
               <nav className='mb-10 list-none'>
                 <li>
-                  <a className='text-sm text-gray-600 hover:text-purple-700'>
+                  <a className='text-sm text-gray-600 hover:text-purple-700 hover:underline'>
                     FAQ
                   </a>
                 </li>
                 <li>
-                  <a className='text-sm text-gray-600 hover:text-purple-700'>
+                  <a className='text-sm text-gray-600 hover:text-purple-700 hover:underline'>
                     Contacts
                   </a>
                 </li>

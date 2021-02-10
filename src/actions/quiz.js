@@ -18,10 +18,7 @@ export const addNewQuestion = (qType) => ({
 
 export const deleteChoice = (qID, cID) => ({
   type: DELETE_CHOICE,
-  payload: {
-    qID,
-    cID,
-  },
+  payload: { qID, cID },
 })
 
 export const deleteQuestion = (id) => ({

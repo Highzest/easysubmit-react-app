@@ -10,8 +10,8 @@ const initialState = {
   questions: [
     {
       id: 0,
-      qType: 'single',
-      content: 'Biology is',
+      qType: 'multiple',
+      content: 'Biology is dd',
       fixed: false,
       choices: [
         {
@@ -44,6 +44,29 @@ const initialState = {
       content: 'guli guli guli guli',
       fixed: false,
       correct: true,
+    },
+    {
+      id: 3,
+      qType: 'single',
+      content: 'Biology is single ',
+      fixed: false,
+      choices: [
+        {
+          id: 0,
+          content: 'biology',
+          correct: false,
+        },
+        {
+          id: 1,
+          content: 'life',
+          correct: true,
+        },
+        {
+          id: 2,
+          content: 'animals',
+          correct: false,
+        },
+      ],
     },
   ],
 }
@@ -122,7 +145,7 @@ export default function (state = initialState, action) {
     case ADD_CHOICE:
       return {
         questions: state.questions.map((q) => {
-          if (q.id !== action.payload.id) {
+          if (q.id !== payload.id) {
             // This isn't the item we care about - keep it as-is
             return q
           }
@@ -143,19 +166,19 @@ export default function (state = initialState, action) {
       }
     case DELETE_QUESTION:
       return {
-        questions: state.questions.filter((q) => action.payload.id !== q.id),
+        questions: state.questions.filter((q) => payload.id !== q.id),
       }
     case SAVE_QUESTION:
       return {
         questions: [
-          ...state.questions.filter((q) => action.payload.id !== q.id),
-          action.payload,
+          ...state.questions.filter((q) => payload.id !== q.id),
+          payload,
         ],
       }
     case DELETE_CHOICE:
       return {
         questions: state.questions.map((q) => {
-          if (q.id !== action.payload.qID) {
+          if (q.id !== payload.qID) {
             // This isn't the item we care about - keep it as-is
             return q
           }
@@ -163,7 +186,7 @@ export default function (state = initialState, action) {
           // Otherwise, this is the one we want - return an updated value
           return {
             ...q,
-            choices: q.choices.filter((c) => action.payload.cID !== c.ID),
+            choices: q.choices.filter((c) => payload.cID !== c.id),
           }
         }),
       }
