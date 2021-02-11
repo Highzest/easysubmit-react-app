@@ -1,4 +1,10 @@
-import { deleteChoice, deleteQuestion } from '../actions/quiz'
+import {
+  addChoice,
+  deleteChoice,
+  deleteQuestion,
+  saveQuestion,
+  updateChoice,
+} from '../actions/quiz'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 
@@ -9,14 +15,16 @@ const QuizQuestion = ({ id }) => {
   const [curIndex, setCurIndex] = useState(
     questions.findIndex((q) => q.id === id)
   )
-
+  const [isSaved, setIsSaved] = useState(false)
   const currentQuestion = questions[curIndex]
   const choicesState = useSelector(
     (state) => state.quiz.questions[curIndex].choices
   )
   const [content, setContent] = useState(currentQuestion.content)
-  const [choices, setChoices] = useState(currentQuestion.choices)
-  const [answer, setAnswer] = useState(currentQuestion.answer)
+  // const [choices, setChoices] = useState(currentQuestion.choices)
+  const [answer, setAnswer] = useState(
+    currentQuestion.answer || currentQuestion.correct
+  )
   const dispatch = useDispatch()
 
   const deleteOption = (e, qID, cID) => {
@@ -24,15 +32,9 @@ const QuizQuestion = ({ id }) => {
     dispatch(deleteChoice(qID, cID))
   }
 
-  if (choices != undefined) {
-    useEffect(() => {
-      setChoices(choicesState)
-    }, [choicesState])
-  }
-
   useEffect(() => {
     setCurIndex(questions.findIndex((q) => q.id === id))
-    setChoices(choicesState)
+    // setChoices(choicesState)
   }, [questions])
 
   const handleDeleteQuestion = (e, id) => {
@@ -40,18 +42,25 @@ const QuizQuestion = ({ id }) => {
     dispatch(deleteQuestion(id))
   }
 
-  const addOption = (e) => {
+  const addOption = (e, id) => {
     e.preventDefault()
-    console.log('option added')
+    dispatch(addChoice(id))
   }
 
-  const saveQuestion = (e) => {
+  const handleSaveQuestion = (e, question) => {
     e.preventDefault()
-    console.log('saved')
+
+    setIsSaved(true)
+    dispatch(saveQuestion(question))
   }
+
+  const handleChangeChoice = (e, qID, choice) => {
+    e.preventDefault()
+    setIsSaved(false)
+    dispatch(updateChoice(qID, choice))
+  }
+
   const renderQuestion = (currentQuestion) => {
-    console.log(currentQuestion.id)
-    console.log(choices)
     switch (currentQuestion.qType) {
       case 'multiple':
         return (
@@ -65,7 +74,10 @@ const QuizQuestion = ({ id }) => {
                     </label>
                     <input
                       value={content}
-                      onChange={(e) => setContent(e.target.value)}
+                      onChange={(e) => {
+                        setContent(e.target.value)
+                        setIsSaved(false)
+                      }}
                       className='w-80 px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
                       type='text'
                       placeholder='Enter your question'
@@ -91,35 +103,38 @@ const QuizQuestion = ({ id }) => {
                 <div className='text-gray-700 ml-4 text-xs pb-2'>
                   Tick correct answers
                 </div>
-                {choices.map((choice, idx) => (
+                {choicesState.map((choice, idx) => (
                   <div key={idx} className='flex flex-row'>
                     <label className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700'>
                       Option {idx + 1}
                     </label>
                     <input
                       value={choice.content}
-                      onChange={(e) =>
-                        setChoices([
-                          ...choices.slice(0, idx),
-                          {
-                            id: choice.id,
-                            content: e.target.value,
-                            correct: choice.correct,
-                          },
-                          ...choices.slice(idx + 1),
-                        ])
-                      }
+                      onChange={(e) => {
+                        handleChangeChoice(e, currentQuestion.id, {
+                          id: choice.id,
+                          content: e.target.value,
+                          correct: choice.correct,
+                        })
+                      }}
                       className='px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
                       type='text'
                       placeholder='Enter your option'
                     />
-                    <input type='checkbox' className='mx-2 outline-none ' />
+                    <input
+                      type='checkbox'
+                      className='mx-2 outline-none '
+                      onChange={(e) => {
+                        setIsSaved(false)
+                      }}
+                    />
                     <button
                       type='button'
                       className='focus:outline-none w-3 h-3 my-2'
-                      onClick={(e) =>
+                      onClick={(e) => {
                         deleteOption(e, currentQuestion.id, choice.id)
-                      }
+                        setIsSaved(false)
+                      }}
                     >
                       <svg viewBox='-40 0 427 427.001' fill='fillCurrent'>
                         <path d='M232.398 154.703c-5.523 0-10 4.477-10 10v189c0 5.52 4.477 10 10 10 5.524 0 10-4.48 10-10v-189c0-5.523-4.476-10-10-10zm0 0M114.398 154.703c-5.523 0-10 4.477-10 10v189c0 5.52 4.477 10 10 10 5.524 0 10-4.48 10-10v-189c0-5.523-4.476-10-10-10zm0 0' />
@@ -131,19 +146,38 @@ const QuizQuestion = ({ id }) => {
                 ))}
               </div>
             </div>
-            <div className='flex flex-row justify-end'>
-              <button
-                onClick={(e) => addOption(e)}
-                className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-              >
-                Add option
-              </button>
-              <button
-                onClick={(e) => saveQuestion(e)}
-                className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-              >
-                Save
-              </button>
+            <div className='flex flex-row justify-between'>
+              <div className='mt-3'>
+                {isSaved ? (
+                  <label className='text-xs text-gray-700 px-2 py-2'>
+                    {' '}
+                    Question Saved
+                  </label>
+                ) : null}
+              </div>
+              <div className=''>
+                <button
+                  onClick={(e) => {
+                    addOption(e, currentQuestion.id)
+                    setIsSaved(false)
+                  }}
+                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
+                >
+                  Add option
+                </button>
+                <button
+                  onClick={(e) =>
+                    handleSaveQuestion(e, {
+                      id: currentQuestion.id,
+                      content,
+                      choicesState,
+                    })
+                  }
+                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
+                >
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         )
@@ -159,7 +193,10 @@ const QuizQuestion = ({ id }) => {
                     </label>
                     <input
                       value={content}
-                      onChange={(e) => setContent(e.target.value)}
+                      onChange={(e) => {
+                        setContent(e.target.value)
+                        setIsSaved(false)
+                      }}
                       className='w-80 px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
                       type='text'
                       placeholder='Enter your question'
@@ -185,24 +222,21 @@ const QuizQuestion = ({ id }) => {
                 <div className='text-gray-700 ml-4 text-xs pb-2'>
                   Tick the correct answer
                 </div>
-                {choices.map((choice, idx) => (
+                {choicesState.map((choice, idx) => (
                   <div key={idx} className='flex flex-row'>
                     <label className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700'>
                       Option {idx + 1}
                     </label>
                     <input
                       value={choice.content}
-                      onChange={(e) =>
-                        setChoices([
-                          ...choices.slice(0, idx),
-                          {
-                            id: choice.id,
-                            content: e.target.value,
-                            correct: choice.correct,
-                          },
-                          ...choices.slice(idx + 1),
-                        ])
-                      }
+                      onChange={(e) => {
+                        handleChangeChoice(e, currentQuestion.id, {
+                          id: choice.id,
+                          content: e.target.value,
+                          correct: choice.correct,
+                        })
+                        setIsSaved(false)
+                      }}
                       className='px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
                       type='text'
                       placeholder='Enter your option'
@@ -211,12 +245,14 @@ const QuizQuestion = ({ id }) => {
                       type='radio'
                       name='single'
                       className='outline-none mx-2'
+                      onChange={(e) => setIsSaved(false)}
                     ></input>
                     <button
                       className='focus:outline-none w-3 h-3 my-2 '
-                      onClick={(e) =>
+                      onClick={(e) => {
                         deleteOption(e, currentQuestion.id, choice.id)
-                      }
+                        setIsSaved(false)
+                      }}
                     >
                       <svg viewBox='-40 0 427 427.001' fill='fillCurrent'>
                         <path d='M232.398 154.703c-5.523 0-10 4.477-10 10v189c0 5.52 4.477 10 10 10 5.524 0 10-4.48 10-10v-189c0-5.523-4.476-10-10-10zm0 0M114.398 154.703c-5.523 0-10 4.477-10 10v189c0 5.52 4.477 10 10 10 5.524 0 10-4.48 10-10v-189c0-5.523-4.476-10-10-10zm0 0' />
@@ -228,19 +264,38 @@ const QuizQuestion = ({ id }) => {
                 ))}
               </div>
             </div>
-            <div className='flex flex-row justify-end'>
-              <button
-                onClick={(e) => addOption(e)}
-                className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-              >
-                Add option
-              </button>
-              <button
-                onClick={(e) => saveQuestion(e)}
-                className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-              >
-                Save
-              </button>
+            <div className='flex flex-row justify-between'>
+              <div className='mt-3'>
+                {isSaved ? (
+                  <label className='text-xs text-gray-700 px-2 py-2'>
+                    {' '}
+                    Question Saved
+                  </label>
+                ) : null}
+              </div>
+              <div className=''>
+                <button
+                  onClick={(e) => {
+                    addOption(e, currentQuestion.id)
+                    setIsSaved(false)
+                  }}
+                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
+                >
+                  Add option
+                </button>
+                <button
+                  onClick={(e) =>
+                    handleSaveQuestion(e, {
+                      id: currentQuestion.id,
+                      content,
+                      choicesState,
+                    })
+                  }
+                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
+                >
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         )
@@ -253,8 +308,11 @@ const QuizQuestion = ({ id }) => {
                   Question
                 </label>
                 <input
-                  value={currentQuestion.content}
-                  onChange={(e) => console.log('hi')}
+                  value={content}
+                  onChange={(e) => {
+                    setContent(e.target.value)
+                    setIsSaved(false)
+                  }}
                   className='w-80 px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
                   type='text'
                   placeholder='Enter your question'
@@ -281,18 +339,37 @@ const QuizQuestion = ({ id }) => {
               </label>
               <textarea
                 value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
+                onChange={(e) => {
+                  setAnswer(e.target.value)
+                  setIsSaved(false)
+                }}
                 className='px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
                 placeholder='Enter your answer'
               />
             </div>
-            <div className='flex flex-row justify-end'>
-              <button
-                onClick={(e) => saveQuestion(e)}
-                className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-              >
-                Save
-              </button>
+            <div className='flex-row flex justify-between'>
+              <div className='mt-3'>
+                {isSaved ? (
+                  <label className='text-xs text-gray-700 px-2 py-2'>
+                    {' '}
+                    Question Saved
+                  </label>
+                ) : null}
+              </div>
+              <div className=''>
+                <button
+                  onClick={(e) =>
+                    handleSaveQuestion(e, {
+                      id: currentQuestion.id,
+                      content,
+                      answer,
+                    })
+                  }
+                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
+                >
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         )
@@ -305,8 +382,11 @@ const QuizQuestion = ({ id }) => {
                   Question
                 </label>
                 <input
-                  value={currentQuestion.content}
-                  onChange={(e) => console.log('hi')}
+                  value={content}
+                  onChange={(e) => {
+                    setContent(e.target.value)
+                    setIsSaved(false)
+                  }}
                   className='w-80 px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
                   type='text'
                   placeholder='Enter your question'
@@ -333,6 +413,11 @@ const QuizQuestion = ({ id }) => {
                 name='choice'
                 value='true'
                 className='outline-none'
+                checked={currentQuestion.correct}
+                onChange={(e) => {
+                  setAnswer(e, !answer)
+                  setIsSaved(false)
+                }}
               />
               <label
                 htmlFor='choice'
@@ -346,6 +431,8 @@ const QuizQuestion = ({ id }) => {
                 name='choice'
                 value='false'
                 className='outline-none'
+                checked={!currentQuestion.correct}
+                onChange={(e) => setIsSaved(false)}
               />
               <label
                 htmlFor='choice'
@@ -355,13 +442,29 @@ const QuizQuestion = ({ id }) => {
               </label>
               <br></br>
             </div>
-            <div className='flex flex-row justify-end'>
-              <button
-                onClick={(e) => saveQuestion(e)}
-                className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-              >
-                Save
-              </button>
+            <div className='flex-row flex justify-between'>
+              <div className='mt-3'>
+                {isSaved ? (
+                  <label className='text-xs text-gray-700 px-2 py-2'>
+                    {' '}
+                    Question Saved
+                  </label>
+                ) : null}
+              </div>
+              <div className=''>
+                <button
+                  onClick={(e) =>
+                    handleSaveQuestion(e, {
+                      id: currentQuestion.id,
+                      content,
+                      answer,
+                    })
+                  }
+                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
+                >
+                  Save
+                </button>
+              </div>
             </div>
           </div>
         )

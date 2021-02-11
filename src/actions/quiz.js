@@ -4,11 +4,17 @@ import {
   DELETE_CHOICE,
   DELETE_QUESTION,
   SAVE_QUESTION,
+  UPDATE_CHOICE,
 } from './types'
 
 export const addChoice = (id) => ({
   type: ADD_CHOICE,
   payload: { id },
+})
+
+export const updateChoice = (qID, choice) => ({
+  type: UPDATE_CHOICE,
+  payload: { qID, choice },
 })
 
 export const addNewQuestion = (qType) => ({
@@ -26,7 +32,7 @@ export const deleteQuestion = (id) => ({
   payload: { id },
 })
 
-export const saveQuestion = (id) => ({
+export const saveQuestion = (question) => ({
   type: SAVE_QUESTION,
-  payload: { id },
+  payload: question,
 })

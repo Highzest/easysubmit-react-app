@@ -4,12 +4,14 @@ import Attendance from './pages/Attendance'
 import CreateHomework from './pages/CreateHomework'
 import Home from './pages/Home'
 import Links from './pages/Links'
+import LinksQuiz from './pages/LinksQuiz'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
 import Quiz from './pages/Quiz'
 import Registration from './pages/Registration'
 import SubmitHomework from './pages/SubmitHomework'
 import ViewHomeworks from './pages/ViewHomeworks'
+import ViewQuizzes from './pages/ViewQuizzes'
 
 function App() {
   return (
@@ -25,6 +27,13 @@ function App() {
           <Route path='/profile' exact component={Profile} />
           <Route path='/link' exact component={Links} />
           <Route path='/student-hw-page' exact component={SubmitHomework} />
+          <Route path='/link_quiz' exact component={LinksQuiz} />
+          <Route path='/teacher-quiz-page' exact component={ViewQuizzes} />
+          <Route
+            path='/teacher-quiz-page/c4gtnV23yui'
+            exact
+            component={ViewQuizzes}
+          />
           <Route
             path='/student-hw-page/:randomStr'
             component={SubmitHomework}

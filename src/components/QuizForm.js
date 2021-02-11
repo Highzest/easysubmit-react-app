@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import CKEditor from 'ckeditor4-react'
 import DateTimePicker from 'react-datetime-picker'
 import QuizQuestion from './QuizQuestion'
+import { Redirect } from 'react-router-dom'
 import { addNewQuestion } from '../actions/quiz'
 import { useState } from 'react'
 
@@ -19,14 +20,47 @@ const QuizForm = () => {
   const [isAdded, setIsAdded] = useState(false)
   const questions = useSelector((state) => state.quiz.questions)
   const dispatch = useDispatch()
+  const [isClicked, setIsClicked] = useState(false)
 
   const handleAdd = (e) => {
     e.preventDefault()
 
     dispatch(addNewQuestion(qType))
   }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setIsClicked(true)
+    /*dispatch(
+      createHomeworkPage(
+        courseTitle,
+        title,
+        description,
+        files,
+        openDate,
+        closeDate,
+        fullName,
+        mode
+      )
+    )
+      .then(() => {
+        setSuccessfull(true)
+        setIsClicked(true)
+      })
+      .catch(() => {
+        setSuccessfull(false)
+        setIsClicked(false)
+      })*/
+  }
+
+  if (isClicked) {
+    return <Redirect to='/link_quiz' />
+  }
   return (
-    <form className='w-3/4 p-4 bg-purple-300 border border-purple-300 rounded'>
+    <form
+      onSubmit={handleSubmit}
+      className='w-3/4 p-4 bg-purple-300 border border-purple-300 rounded'
+    >
       {isLoggedIn ? null : (
         <div className='flex flex-row items-center pb-2 items'>
           <label className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase'>
