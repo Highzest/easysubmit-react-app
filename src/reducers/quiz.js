@@ -5,6 +5,8 @@ import {
   DELETE_QUESTION,
   SAVE_QUESTION,
   UPDATE_CHOICE,
+  CREATE_QUIZ,
+  FETCH_QUIZ,
 } from '../actions/types'
 
 const teacherLink = JSON.parse(localStorage.getItem('teacherLink'))
@@ -228,6 +230,15 @@ export default function (state = initialState, action) {
             choices: q.choices.filter((c) => payload.cID !== c.id),
           }
         }),
+      }
+    case CREATE_QUIZ:
+      return {
+        ...state,
+      }
+    case FETCH_QUIZ:
+      return {
+        ...state,
+        quiz: payload,
       }
     default:
       return state
