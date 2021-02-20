@@ -42,6 +42,7 @@ const createHomeworkPage = (
       return response.data
     })
 }
+
 const fetchHomeworkPage = (randomStr) => {
   return axios
     .get(`/api/v1/homework-page/student/${randomStr}`, {

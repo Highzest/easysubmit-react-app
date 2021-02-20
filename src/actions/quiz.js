@@ -7,6 +7,8 @@ import {
   UPDATE_CHOICE,
 } from './types'
 
+import QuizService from '../services/quiz'
+
 export const addChoice = (id) => ({
   type: ADD_CHOICE,
   payload: { id },
@@ -36,3 +38,40 @@ export const saveQuestion = (question) => ({
   type: SAVE_QUESTION,
   payload: question,
 })
+
+export const createQuiz = (
+  title,
+  content,
+  courseTitle,
+  openDate,
+  closeDate,
+  fullName,
+  mode,
+  questions
+) => (dispatch) => {
+  return QuizService.createQuiz(
+    title,
+    content,
+    courseTitle,
+    openDate,
+    closeDate,
+    fullName,
+    mode,
+    questions
+  ).then((data) => {
+    dispatch({
+      type: CREATE_QUIZ,
+    })
+    return Promise.resolve()
+  })
+}
+
+export const fetchQuiz = (randomStr) => (dispatch) => {
+  return QuizService.fetchQuiz(randomStr).then((data) => {
+    dispatch({
+      type: FETCH_QUIZ,
+      payload: data,
+    })
+    return Promise.resolve()
+  })
+}
