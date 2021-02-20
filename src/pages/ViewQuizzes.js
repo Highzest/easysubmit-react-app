@@ -39,9 +39,9 @@ const ViewQuizzes = () => {
         }
       })
       .catch((response) => {
-        history.push('/signin')
+        // history.push('/signin')
       })
-  }, [])
+  }, null)
 
   const ckEditorRemoveTags = (data) => {
     const editedData = data.replace('<p>', '').replace('</p>', '')
@@ -76,14 +76,12 @@ const ViewQuizzes = () => {
         })
       })
   }
-
   if (isLoggedIn && role === 'student') {
     return <Redirect to='/' />
   }
 
   const data = ckEditorRemoveTags(description)
   const isEmptyDesc = description.trim() === ''
-  const isEmptyFile = files.length === 0
   const submittedHWs = quizzes.length
 
   return (
@@ -100,7 +98,9 @@ const ViewQuizzes = () => {
             <div className='flex flex-col w-3/4'>
               <h2 className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase'>
                 <strong>Quiz Title:</strong>{' '}
-                <span className='text-purple-900'>{title}</span>
+                <span className='text-purple-900'>
+                  {/*title*/}Cell Structure
+                </span>
               </h2>
               {isEmptyDesc ? null : (
                 <h2 className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase'>
@@ -108,13 +108,25 @@ const ViewQuizzes = () => {
                   <br></br> <span className='text-purple-900'>{data}</span>
                 </h2>
               )}
-              {isEmptyFile ? null : (
-                <h2 className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase'>
-                  <strong>Attachments:</strong>
-                  <br></br> <span className='text-purple-900'>{files}</span>
-                </h2>
-              )}
               <div className='flex flex-col ml-2 items '>
+                <div className='flex flex-col mb-2 border border-purple-700 rounded'>
+                  <div className='flex flex-col pb-2 items'>
+                    <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
+                      <strong>Student Name:</strong>{' '}
+                      <span className='text-purple-900'>Dariya Shakenova</span>
+                    </p>
+                    <p className='block px-4 pt-1 mb-2 text-xs tracking-wide text-gray-700'>
+                      <strong>Submitted at:</strong>{' '}
+                      <span className='text-purple-900'>2021-21-01 15:45</span>
+                    </p>
+                    <div className='flex flex-row mb-2'>
+                      <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
+                        <strong>Grade: </strong>
+                        <span className='text-purple-900'>12/20</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 {quizzes.map((quiz, index) => (
                   <div
                     key={index}
@@ -200,7 +212,7 @@ const ViewQuizzes = () => {
               <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
                 <strong>
                   <span className='font-bold text-purple-800'>
-                    {submittedHWs}
+                    1{/*submittedHWs*/}
                   </span>{' '}
                   Quizzes Submitted
                 </strong>{' '}

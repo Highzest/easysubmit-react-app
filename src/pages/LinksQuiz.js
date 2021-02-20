@@ -16,8 +16,8 @@ const LinksQuiz = () => {
   const studentTextArea = useRef(null)
   const teacherTextArea = useRef(null)
 
-  const fullStudentLink = `https://radiant-inlet-12251.herokuapp.com/student-quiz-page/${studentLink}`
-  const fullTeacherLink = `https://radiant-inlet-12251.herokuapp.com/teacher-quiz-page/${teacherLink}`
+  const fullStudentLink = `http://localhost:3000/student-quiz-page/${studentLink}`
+  const fullTeacherLink = `http://localhost:3000/teacher-quiz-page/${teacherLink}`
 
   const copyLinkClipboard = (e, caller) => {
     if (caller === 'student') {

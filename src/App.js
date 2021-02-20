@@ -10,6 +10,7 @@ import Profile from './pages/Profile'
 import Quiz from './pages/Quiz'
 import Registration from './pages/Registration'
 import SubmitHomework from './pages/SubmitHomework'
+import SubmitQuiz from './pages/SubmitQuiz'
 import ViewHomeworks from './pages/ViewHomeworks'
 import ViewQuizzes from './pages/ViewQuizzes'
 
@@ -34,12 +35,18 @@ function App() {
             exact
             component={ViewQuizzes}
           />
+          <Route path='/student-quiz-page' exact component={SubmitQuiz} />
+          <Route
+            path='/student-quiz-page/mk4Lm26uydc'
+            exact
+            component={SubmitQuiz}
+          />
           <Route
             path='/student-hw-page/:randomStr'
             component={SubmitHomework}
           />
-          <Route path='/teacher-hw-page/:randomStr' component={ViewHomeworks} />
           <Route path='/teacher-hw-page' exact component={ViewHomeworks} />
+          <Route path='/teacher-hw-page/:randomStr' component={ViewHomeworks} />
         </Switch>
       </main>
     </div>
