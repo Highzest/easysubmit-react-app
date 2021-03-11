@@ -4,6 +4,7 @@ import {
   deleteQuestion,
   saveQuestion,
   updateChoice,
+  updateChoices,
 } from '../actions/quiz'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
@@ -16,14 +17,9 @@ const QuizQuestion = ({ id }) => {
     questions.findIndex((q) => q.id === id)
   )
   const [isSaved, setIsSaved] = useState(false)
-  const currentQuestion = questions[curIndex]
+  const currentQuestion = useSelector((state) => state.quiz.questions[curIndex])
   const choicesState = useSelector(
     (state) => state.quiz.questions[curIndex].choices
-  )
-  const [content, setContent] = useState(currentQuestion.content)
-  // const [choices, setChoices] = useState(currentQuestion.choices)
-  const [answer, setAnswer] = useState(
-    currentQuestion.answer || currentQuestion.correct
   )
   const dispatch = useDispatch()
 
@@ -32,10 +28,12 @@ const QuizQuestion = ({ id }) => {
     dispatch(deleteChoice(qID, cID))
   }
 
-  useEffect(() => {
-    setCurIndex(questions.findIndex((q) => q.id === id))
-    // setChoices(choicesState)
-  }, [questions])
+  // useEffect(() => {
+  //   setCurIndex(questions.findIndex((q) => q.id === id))
+  //   // setCurrentQuestion({ ...questions[curIndex] })
+  //   // setContent(questions[curIndex].content)
+  //   // setAnswer(questions[curIndex].answer)
+  // }, [questions[curIndex]])
 
   const handleDeleteQuestion = (e, id) => {
     e.preventDefault()
@@ -55,7 +53,7 @@ const QuizQuestion = ({ id }) => {
   }
 
   const handleChangeChoice = (e, qID, choice) => {
-    e.preventDefault()
+    // e.preventDefault()
     setIsSaved(false)
     dispatch(updateChoice(qID, choice))
   }
@@ -73,9 +71,14 @@ const QuizQuestion = ({ id }) => {
                       Question
                     </label>
                     <input
-                      value={content}
+                      value={currentQuestion.content}
                       onChange={(e) => {
-                        setContent(e.target.value)
+                        dispatch(
+                          saveQuestion({
+                            id: currentQuestion.id,
+                            content: e.target.value,
+                          })
+                        )
                         setIsSaved(false)
                       }}
                       className='w-80 px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
@@ -114,7 +117,6 @@ const QuizQuestion = ({ id }) => {
                         handleChangeChoice(e, currentQuestion.id, {
                           id: choice.id,
                           content: e.target.value,
-                          correct: choice.correct,
                         })
                       }}
                       className='px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
@@ -123,9 +125,13 @@ const QuizQuestion = ({ id }) => {
                     />
                     <input
                       type='checkbox'
+                      checked={choice.correct}
                       className='mx-2 outline-none '
                       onChange={(e) => {
-                        setIsSaved(false)
+                        handleChangeChoice(e, currentQuestion.id, {
+                          id: choice.id,
+                          correct: e.target.checked,
+                        })
                       }}
                     />
                     <button
@@ -146,15 +152,7 @@ const QuizQuestion = ({ id }) => {
                 ))}
               </div>
             </div>
-            <div className='flex flex-row justify-between'>
-              <div className='mt-3'>
-                {isSaved ? (
-                  <label className='text-xs text-gray-700 px-2 py-2'>
-                    {' '}
-                    Question Saved
-                  </label>
-                ) : null}
-              </div>
+            <div className='flex flex-row justify-end'>
               <div className=''>
                 <button
                   onClick={(e) => {
@@ -164,18 +162,6 @@ const QuizQuestion = ({ id }) => {
                   className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
                 >
                   Add option
-                </button>
-                <button
-                  onClick={(e) =>
-                    handleSaveQuestion(e, {
-                      id: currentQuestion.id,
-                      content,
-                      choicesState,
-                    })
-                  }
-                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-                >
-                  Save
                 </button>
               </div>
             </div>
@@ -192,9 +178,14 @@ const QuizQuestion = ({ id }) => {
                       Question
                     </label>
                     <input
-                      value={content}
+                      value={currentQuestion.content}
                       onChange={(e) => {
-                        setContent(e.target.value)
+                        dispatch(
+                          saveQuestion({
+                            id: currentQuestion.id,
+                            content: e.target.value,
+                          })
+                        )
                         setIsSaved(false)
                       }}
                       className='w-80 px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
@@ -233,7 +224,6 @@ const QuizQuestion = ({ id }) => {
                         handleChangeChoice(e, currentQuestion.id, {
                           id: choice.id,
                           content: e.target.value,
-                          correct: choice.correct,
                         })
                         setIsSaved(false)
                       }}
@@ -243,9 +233,12 @@ const QuizQuestion = ({ id }) => {
                     />
                     <input
                       type='radio'
+                      checked={choice.correct}
                       name='single'
                       className='outline-none mx-2'
-                      onChange={(e) => setIsSaved(false)}
+                      onChange={(e) =>
+                        dispatch(updateChoices(currentQuestion.id, choice.id))
+                      }
                     ></input>
                     <button
                       className='focus:outline-none w-3 h-3 my-2 '
@@ -264,15 +257,7 @@ const QuizQuestion = ({ id }) => {
                 ))}
               </div>
             </div>
-            <div className='flex flex-row justify-between'>
-              <div className='mt-3'>
-                {isSaved ? (
-                  <label className='text-xs text-gray-700 px-2 py-2'>
-                    {' '}
-                    Question Saved
-                  </label>
-                ) : null}
-              </div>
+            <div className='flex flex-row justify-end'>
               <div className=''>
                 <button
                   onClick={(e) => {
@@ -282,18 +267,6 @@ const QuizQuestion = ({ id }) => {
                   className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
                 >
                   Add option
-                </button>
-                <button
-                  onClick={(e) =>
-                    handleSaveQuestion(e, {
-                      id: currentQuestion.id,
-                      content,
-                      choicesState,
-                    })
-                  }
-                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-                >
-                  Save
                 </button>
               </div>
             </div>
@@ -308,9 +281,14 @@ const QuizQuestion = ({ id }) => {
                   Question
                 </label>
                 <input
-                  value={content}
+                  value={currentQuestion.content}
                   onChange={(e) => {
-                    setContent(e.target.value)
+                    dispatch(
+                      saveQuestion({
+                        id: currentQuestion.id,
+                        content: e.target.value,
+                      })
+                    )
                     setIsSaved(false)
                   }}
                   className='w-80 px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
@@ -338,38 +316,18 @@ const QuizQuestion = ({ id }) => {
                 Answer
               </label>
               <textarea
-                value={answer}
+                value={currentQuestion.answer}
                 onChange={(e) => {
-                  setAnswer(e.target.value)
-                  setIsSaved(false)
+                  dispatch(
+                    saveQuestion({
+                      id: currentQuestion.id,
+                      answer: e.target.value,
+                    })
+                  )
                 }}
                 className='px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
                 placeholder='Enter your answer'
               />
-            </div>
-            <div className='flex-row flex justify-between'>
-              <div className='mt-3'>
-                {isSaved ? (
-                  <label className='text-xs text-gray-700 px-2 py-2'>
-                    {' '}
-                    Question Saved
-                  </label>
-                ) : null}
-              </div>
-              <div className=''>
-                <button
-                  onClick={(e) =>
-                    handleSaveQuestion(e, {
-                      id: currentQuestion.id,
-                      content,
-                      answer,
-                    })
-                  }
-                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-                >
-                  Save
-                </button>
-              </div>
             </div>
           </div>
         )
@@ -382,10 +340,14 @@ const QuizQuestion = ({ id }) => {
                   Question
                 </label>
                 <input
-                  value={content}
+                  value={currentQuestion.content}
                   onChange={(e) => {
-                    setContent(e.target.value)
-                    setIsSaved(false)
+                    dispatch(
+                      saveQuestion({
+                        id: currentQuestion.id,
+                        content: e.target.value,
+                      })
+                    )
                   }}
                   className='w-80 px-2 py-1  text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
                   type='text'
@@ -410,13 +372,19 @@ const QuizQuestion = ({ id }) => {
             <div className='ml-4'>
               <input
                 type='radio'
-                name='choice'
+                name={`choice${currentQuestion.id}`}
                 value='true'
                 className='outline-none'
-                checked={currentQuestion.correct}
+                defaultChecked={currentQuestion.answer === true}
                 onChange={(e) => {
-                  setAnswer(e, !answer)
-                  setIsSaved(false)
+                  if (!currentQuestion.answer && e.target.checked) {
+                    dispatch(
+                      saveQuestion({
+                        id: currentQuestion.id,
+                        answer: true,
+                      })
+                    )
+                  }
                 }}
               />
               <label
@@ -428,11 +396,20 @@ const QuizQuestion = ({ id }) => {
               <br></br>
               <input
                 type='radio'
-                name='choice'
+                name={`choice${currentQuestion.id}`}
                 value='false'
+                defaultChecked={currentQuestion.answer === false}
                 className='outline-none'
-                checked={!currentQuestion.correct}
-                onChange={(e) => setIsSaved(false)}
+                onChange={(e) => {
+                  if (currentQuestion.answer && e.target.checked) {
+                    dispatch(
+                      saveQuestion({
+                        id: currentQuestion.id,
+                        answer: false,
+                      })
+                    )
+                  }
+                }}
               />
               <label
                 htmlFor='choice'
@@ -441,30 +418,6 @@ const QuizQuestion = ({ id }) => {
                 false
               </label>
               <br></br>
-            </div>
-            <div className='flex-row flex justify-between'>
-              <div className='mt-3'>
-                {isSaved ? (
-                  <label className='text-xs text-gray-700 px-2 py-2'>
-                    {' '}
-                    Question Saved
-                  </label>
-                ) : null}
-              </div>
-              <div className=''>
-                <button
-                  onClick={(e) =>
-                    handleSaveQuestion(e, {
-                      id: currentQuestion.id,
-                      content,
-                      answer,
-                    })
-                  }
-                  className='border mt-1 rounded border-purple-400 px-2 py-1 text-xs text-purple-900 focus:outline-none hover:bg-purple-400 mr-2'
-                >
-                  Save
-                </button>
-              </div>
             </div>
           </div>
         )
@@ -482,4 +435,7 @@ const QuizQuestion = ({ id }) => {
   )
 }
 
+QuizQuestion.propTypes = {
+  id: PropTypes.number,
+}
 export default QuizQuestion

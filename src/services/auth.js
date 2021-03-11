@@ -12,7 +12,7 @@ const register = (firstName, lastName, email, password, role) => {
 
 const login = (email, password) => {
   return axios
-    .post('/api/v1/login', {
+    .post('https://radiant-inlet-12251.herokuapp.com/api/v1/login', {
       email,
       password,
     })

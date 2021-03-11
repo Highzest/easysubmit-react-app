@@ -1,10 +1,12 @@
 import {
   ADD_CHOICE,
   ADD_NEW_QUESTION,
+  CREATE_QUIZ,
   DELETE_CHOICE,
   DELETE_QUESTION,
   SAVE_QUESTION,
   UPDATE_CHOICE,
+  UPDATE_CHOICES,
 } from './types'
 
 import QuizService from '../services/quiz'
@@ -39,6 +41,11 @@ export const saveQuestion = (question) => ({
   payload: question,
 })
 
+export const gradeQuiz = (id, grade) => ({
+  type: GRADE_QUIZ,
+  payload: { id, grade },
+})
+
 export const createQuiz = (
   title,
   content,
@@ -61,10 +68,19 @@ export const createQuiz = (
   ).then((data) => {
     dispatch({
       type: CREATE_QUIZ,
+      payload: {
+        studentLink: data.student_link,
+        teacherLink: data.teacher_link,
+      },
     })
     return Promise.resolve()
   })
 }
+
+export const updateChoices = (qID, cID) => ({
+  type: UPDATE_CHOICES,
+  payload: { qID, cID },
+})
 
 export const fetchQuiz = (randomStr) => (dispatch) => {
   return QuizService.fetchQuiz(randomStr).then((data) => {

@@ -20,7 +20,7 @@ const required = (value) => {
   }
 }
 
-const email = (value) => {
+const vemail = (value) => {
   if (!isEmail(value)) {
     return (
       <div
@@ -150,7 +150,7 @@ const RegistrationForm = () => {
                 aria-label='Email address'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                validations={[required, email]}
+                validations={[required, vemail]}
                 name='email'
                 type='email'
                 required

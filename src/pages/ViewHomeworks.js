@@ -1,4 +1,6 @@
+import { CREATE_HOMEWORK, UPDATE_HOMEWORK } from '../actions/types'
 import { Redirect, useHistory, useParams } from 'react-router-dom'
+import { gradeHomework, updateHomework } from '../actions/homework'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 
@@ -6,41 +8,33 @@ import Footer from '../components/Footer'
 import Header from '../components/Header'
 import authHeader from '../services/auth-header'
 import axios from 'axios'
-import { gradeHomework } from '../actions/homework'
 
 const ViewHomeworks = () => {
   const { randomStr } = useParams()
   const history = useHistory()
   const role = useSelector((state) => state.auth.role)
+  const homeworkPage = useSelector((state) => state.homework)
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
   const dispatch = useDispatch()
-  const [id, setId] = useState(null)
-  const [graded, setGraded] = useState(false)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [files, setFiles] = useState([])
-  const [closeDate, setCloseDate] = useState(new Date())
-  const [grade, setGrade] = useState('')
-  const [comments, setComments] = useState('')
-  const [hwPageID, setHwPageID] = useState(-1)
-  const [homeworks, setHomeworks] = useState([])
+  const [isLoading, setLoading] = useState(true)
 
   useEffect(() => {
     axios
-      .get(`/api/v1/homework-page/teacher/${randomStr}`, {
-        headers: authHeader(),
-      })
-      .then((response) => {
-        if (response.data) {
-          setHwPageID(response.data.id)
-          setHomeworks(response.data.homeworks)
-          setTitle(response.data.title)
-          setDescription(response.data.content)
-          setCloseDate(response.data.closed_at)
+      .get(
+        `https://radiant-inlet-12251.herokuapp.com/api/v1/homework-page/teacher/${randomStr}`,
+        {
+          headers: authHeader(),
         }
+      )
+      .then((response) => {
+        dispatch({
+          type: CREATE_HOMEWORK,
+          payload: response.data,
+        })
+        setLoading(false)
       })
       .catch((response) => {
-        history.push('/signin')
+        //history.push('/signin')
       })
   }, [])
 
@@ -49,32 +43,27 @@ const ViewHomeworks = () => {
     return editedData
   }
 
-  const handleGrade = (idx, e) => {
+  const handleGrade = (hwID, e) => {
     e.preventDefault()
+
+    let hw = homeworkPage.homeworks.find((h) => h.id === hwID)
 
     dispatch(
       gradeHomework(
-        this.state.homeworks[idx].id,
-        this.state.homeworks[idx].student_fullname,
-        this.state.homeworks[idx].content,
-        this.state.homeworks[idx].submitted_at,
-        this.state.grade,
-        this.state.comments,
-        this.state.hwPageID
+        hw.id,
+        hw.content,
+        hw.student_fullname,
+        hw.submitted_at,
+        hw.grade,
+        hw.comments,
+        hw.homework_page_id
       )
     )
       .then(() => {
-        this.setState({
-          isGraded: true,
-          successful: true,
-        })
-        window.location.reload()
+        //window.location.reload()
       })
       .catch(() => {
-        this.setState({
-          isGraded: false,
-          successful: false,
-        })
+        console.log('CANNOT GRADE HOMEWORK AND SEND GRADE TO SERVER!')
       })
   }
 
@@ -82,11 +71,10 @@ const ViewHomeworks = () => {
     return <Redirect to='/' />
   }
 
-  const data = ckEditorRemoveTags(description)
-  const isEmptyDesc = description.trim() === ''
-  const isEmptyFile = files.length === 0
-  const submittedHWs = homeworks.length
-
+  const data = ckEditorRemoveTags(homeworkPage.content)
+  const isEmptyDesc = homeworkPage.content.trim() === ''
+  const isEmptyFile = homeworkPage.files ? true : files.length === 0
+  const submittedHWs = homeworkPage.homeworks.length
   return (
     <div>
       <Header />
@@ -101,7 +89,7 @@ const ViewHomeworks = () => {
             <div className='flex flex-col w-3/4'>
               <h2 className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase'>
                 <strong>Homework Title:</strong>{' '}
-                <span className='text-purple-900'>{title}</span>
+                <span className='text-purple-900'>{homeworkPage.title}</span>
               </h2>
               {isEmptyDesc ? null : (
                 <h2 className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase'>
@@ -112,91 +100,111 @@ const ViewHomeworks = () => {
               {isEmptyFile ? null : (
                 <h2 className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase'>
                   <strong>Attachments:</strong>
-                  <br></br> <span className='text-purple-900'>{files}</span>
+                  <br></br>
+                  <span className='text-purple-900'>{homeworkPage.files}</span>
                 </h2>
               )}
               <div className='flex flex-col ml-2 items '>
-                {homeworks.map((homework, index) => (
-                  <div
-                    key={index}
-                    className='flex flex-col mb-2 border border-purple-700 rounded'
-                  >
-                    <div className='flex flex-col pb-2 items'>
-                      <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                        <strong>Student Name:</strong>{' '}
-                        <span className='text-purple-900'>
-                          {homework.student_fullname}
-                        </span>
-                      </p>
-                      <p className='block px-4 pt-1 mb-2 text-xs tracking-wide text-gray-700'>
-                        <strong>Submitted at:</strong>{' '}
-                        <span className='text-purple-900'>
-                          {homework.submitted_at}
-                        </span>
-                      </p>
-                      {homework.content.trim() === '' ? null : (
-                        <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                          <strong>Content:</strong>
-                          <br />{' '}
-                          <span className='text-purple-900'>
-                            {this.ckEditorRemoveTags(homework.content)}
-                          </span>
-                        </p>
-                      )}
-                      {homework.grade.trim() === '' ? (
-                        <form
-                          onSubmit={handleGrade.bind(this, index)}
-                          className='flex flex-col'
-                        >
-                          <div className='flex flex-row mb-2'>
+                {isLoading
+                  ? null
+                  : homeworkPage.homeworks.map((homework, index) => (
+                      <div
+                        key={index}
+                        className='flex flex-col mb-2 border border-purple-700 rounded'
+                      >
+                        <div className='flex flex-col pb-2 items'>
+                          <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
+                            <strong>Student Name:</strong>{' '}
+                            <span className='text-purple-900'>
+                              {homework.student_fullname}
+                            </span>
+                          </p>
+                          <p className='block px-4 pt-1 mb-2 text-xs tracking-wide text-gray-700'>
+                            <strong>Submitted at:</strong>{' '}
+                            <span className='text-purple-900'>
+                              {homework.submitted_at}
+                            </span>
+                          </p>
+                          {homework.content.trim() === '' ? null : (
                             <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                              <strong>Grade: </strong>
+                              <strong>Content:</strong>
+                              <br />
+                              <span className='text-purple-900'>
+                                {ckEditorRemoveTags(homework.content)}
+                              </span>
                             </p>
-                            <input
-                              value={grade}
-                              onChange={(e) => setGrade(e.target.value)}
-                              className='w-10 px-2 py-1 text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
-                              type='text'
-                              placeholder=''
-                            />
-                          </div>
-                          <div className='flex flex-row'>
-                            <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                              <strong>Comments: </strong>
-                            </p>
-                            <textarea
-                              value={comments}
-                              onChange={(e) => setComments(e.target.value)}
-                              className='px-2 py-1 text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
-                              type='text'
-                              placeholder=''
-                            />
-                            <br />
-                          </div>
-                          <div>
-                            <button
-                              type='submit'
-                              className='relative flex justify-center px-2 py-1 mt-2 mb-2 ml-4 text-sm font-medium leading-4 text-purple-200 transition duration-150 ease-in-out bg-purple-800 border border-transparent rounded-md hover:bg-purple-500 focus:outline-none'
+                          )}
+                          {!homework.isGraded ? (
+                            <form
+                              onSubmit={handleGrade.bind(this, homework.id)}
+                              className='flex flex-col'
                             >
-                              Grade Homework
-                            </button>
-                          </div>
-                        </form>
-                      ) : (
-                        <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                          <strong>Grade:</strong>
-                          <span className='text-purple-900'>
-                            {homework.grade}
-                          </span>
-                          <strong>Comments:</strong>
-                          <span className='text-purple-900'>
-                            {homework.comments}
-                          </span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                              <div className='flex flex-row mb-2'>
+                                <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
+                                  <strong>Grade: </strong>
+                                </p>
+                                <input
+                                  value={homework.grade}
+                                  onChange={(e) =>
+                                    dispatch({
+                                      type: UPDATE_HOMEWORK,
+                                      payload: {
+                                        id: homework.id,
+                                        grade: e.target.value,
+                                      },
+                                    })
+                                  }
+                                  className='w-10 px-2 py-1 text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
+                                  type='text'
+                                  placeholder=''
+                                />
+                              </div>
+                              <div className='flex flex-row'>
+                                <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
+                                  <strong>Comments: </strong>
+                                </p>
+                                <textarea
+                                  value={homework.comments}
+                                  onChange={(e) =>
+                                    dispatch({
+                                      type: UPDATE_HOMEWORK,
+                                      payload: {
+                                        id: homework.id,
+                                        comments: e.target.value,
+                                      },
+                                    })
+                                  }
+                                  className='px-2 py-1 text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
+                                  type='text'
+                                  placeholder=''
+                                />
+                                <br />
+                              </div>
+                              <div>
+                                <button
+                                  type='submit'
+                                  className='relative flex justify-center px-2 py-1 mt-2 mb-2 ml-4 text-sm font-medium leading-4 text-purple-200 transition duration-150 ease-in-out bg-purple-800 border border-transparent rounded-md hover:bg-purple-500 focus:outline-none'
+                                >
+                                  Grade Homework
+                                </button>
+                              </div>
+                            </form>
+                          ) : (
+                            <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
+                              <strong>Grade:</strong>
+                              <span className='text-purple-900'>
+                                {homework.grade}
+                              </span>
+                              <br />
+                              <strong>Comments:</strong>
+                              <span className='text-purple-900'>
+                                {homework.comments}
+                              </span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
               </div>
             </div>
             <div className='flex flex-col '>

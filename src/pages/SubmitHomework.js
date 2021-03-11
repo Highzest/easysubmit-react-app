@@ -28,7 +28,7 @@ const SubmitHomework = () => {
   const [closeDate, setCloseDate] = useState(new Date())
   const [grade, setGrade] = useState('')
   const [comments, setComments] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+  const [isSubmitted, setSubmitted] = useState(false)
   const [hwPageID, setHwPageID] = useState(-1)
   const [mode, setMode] = useState('all')
 
@@ -55,9 +55,12 @@ const SubmitHomework = () => {
 
   useEffect(() => {
     axios
-      .get(`/api/v1/homework-page/student/${randomStr}`, {
-        headers: authHeader(),
-      })
+      .get(
+        `https://radiant-inlet-12251.herokuapp.com/api/v1/homework-page/student/${randomStr}`,
+        {
+          headers: authHeader(),
+        }
+      )
       .then((response) => {
         if (response.data) {
           setHwPageID(response.data.id)
@@ -69,7 +72,7 @@ const SubmitHomework = () => {
         }
       })
       .catch((response) => {
-        history.push('/signin')
+        //history.push('/signin')
       })
   }, [])
 

@@ -14,19 +14,19 @@ const Links = () => {
   const studentTextArea = useRef(null)
   const teacherTextArea = useRef(null)
 
-  const fullStudentLink = `https://radiant-inlet-12251.herokuapp.com/student-hw-page/${studentLink}`
-  const fullTeacherLink = `https://radiant-inlet-12251.herokuapp.com/teacher-hw-page/${teacherLink}`
+  const fullStudentLink = `/student-hw-page/${studentLink}`
+  const fullTeacherLink = `/teacher-hw-page/${teacherLink}`
 
   const copyLinkClipboard = (e, caller) => {
     if (caller === 'student') {
-      studentTextArea.select()
+      studentTextArea.current.select()
       document.execCommand('copy')
       e.target.focus()
       setStudentLinkCopied(true)
       return
     }
 
-    teacherTextArea.select()
+    teacherTextArea.current.select()
     document.execCommand('copy')
     e.target.focus()
     setTeacherLinkCopied(true)

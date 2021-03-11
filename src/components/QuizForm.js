@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import CKEditor from 'ckeditor4-react'
 import DateTimePicker from 'react-datetime-picker'
 import QuizQuestion from './QuizQuestion'
-import { Redirect } from 'react-router-dom'
 import { addNewQuestion } from '../actions/quiz'
+import { createQuiz } from '../actions/quiz'
+import { useHistory } from 'react-router-dom'
 import { useState } from 'react'
 
 const QuizForm = () => {
@@ -12,15 +13,15 @@ const QuizForm = () => {
   const [fullName, setFullName] = useState('')
   const [courseTitle, setCourseTitle] = useState('')
   const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
+  const [content, setContent] = useState('')
   const [mode, setMode] = useState('all')
   const [openDate, setOpenDate] = useState(new Date())
   const [closeDate, setCloseDate] = useState(new Date())
   const [qType, setQType] = useState('single')
-  const [isAdded, setIsAdded] = useState(false)
+  const [errors, setErrors] = useState('')
   const questions = useSelector((state) => state.quiz.questions)
   const dispatch = useDispatch()
-  const [isClicked, setIsClicked] = useState(false)
+  const history = useHistory()
 
   const handleAdd = (e) => {
     e.preventDefault()
@@ -30,32 +31,26 @@ const QuizForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    setIsClicked(true)
-    /*dispatch(
-      createHomeworkPage(
-        courseTitle,
+    dispatch(
+      createQuiz(
         title,
-        description,
-        files,
+        content,
+        courseTitle,
         openDate,
         closeDate,
         fullName,
-        mode
+        mode,
+        questions
       )
     )
       .then(() => {
-        setSuccessfull(true)
-        setIsClicked(true)
+        history.push('/link_quiz')
       })
-      .catch(() => {
-        setSuccessfull(false)
-        setIsClicked(false)
-      })*/
+      .catch((err) => {
+        setErrors(err.message)
+      })
   }
 
-  if (isClicked) {
-    return <Redirect to='/link_quiz' />
-  }
   return (
     <form
       onSubmit={handleSubmit}
@@ -117,8 +112,8 @@ const QuizForm = () => {
           Description
         </label>
         <CKEditor
-          data={description}
-          onChange={(e) => setDescription(e.editor.getData())}
+          data={content}
+          onChange={(e) => setContent(e.editor.getData())}
         />
       </div>
       <div className='flex flex-row items-center pb-2 items'>
@@ -139,6 +134,7 @@ const QuizForm = () => {
           onChange={(date) => setCloseDate(date)}
         />
       </div>
+      <p>{errors != '' && errors}</p>
       {questions.map((question, index) => {
         return <QuizQuestion key={index} id={question.id} />
       })}

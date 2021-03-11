@@ -8,16 +8,14 @@ const LinksQuiz = () => {
   const [studentLinkCopied, setStudentLinkCopied] = useState(false)
   const [teacherLinkCopied, setTeacherLinkCopied] = useState(false)
 
-  //const studentLink = useSelector((state) => state.quiz.studentLink)
-  //const teacherLink = useSelector((state) => state.quiz.teacherLink)
-  const teacherLink = 'c4gtnV23yui'
-  const studentLink = 'mk4Lm26uydc'
+  const studentLink = useSelector((state) => state.quiz.studentLink)
+  const teacherLink = useSelector((state) => state.quiz.teacherLink)
 
   const studentTextArea = useRef(null)
   const teacherTextArea = useRef(null)
 
-  const fullStudentLink = `http://localhost:3000/student-quiz-page/${studentLink}`
-  const fullTeacherLink = `http://localhost:3000/teacher-quiz-page/${teacherLink}`
+  const fullStudentLink = `/student-quiz-page/${studentLink}`
+  const fullTeacherLink = `/teacher-quiz-page/${teacherLink}`
 
   const copyLinkClipboard = (e, caller) => {
     if (caller === 'student') {

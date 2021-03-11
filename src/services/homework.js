@@ -13,7 +13,7 @@ const createHomeworkPage = (
 ) => {
   return axios
     .post(
-      '/api/v1/homework-page',
+      'https://radiant-inlet-12251.herokuapp.com/api/v1/homework-page',
       {
         course_title: courseTitle,
         title: title,
@@ -32,11 +32,11 @@ const createHomeworkPage = (
       if (response.data) {
         localStorage.setItem(
           'teacherLink',
-          JSON.stringify(response.data.teacherLink)
+          JSON.stringify(response.data.teacher_link)
         )
         localStorage.setItem(
           'studentLink',
-          JSON.stringify(response.data.studentLink)
+          JSON.stringify(response.data.student_link)
         )
       }
       return response.data
@@ -45,9 +45,12 @@ const createHomeworkPage = (
 
 const fetchHomeworkPage = (randomStr) => {
   return axios
-    .get(`/api/v1/homework-page/student/${randomStr}`, {
-      headers: authHeader(),
-    })
+    .get(
+      `https://radiant-inlet-12251.herokuapp.com/api/v1/homework-page/student/${randomStr}`,
+      {
+        headers: authHeader(),
+      }
+    )
     .then((response) => {
       return response.data
     })
@@ -63,7 +66,7 @@ const submitHomework = (
 ) => {
   return axios
     .post(
-      '/api/v1/homework',
+      'https://radiant-inlet-12251.herokuapp.com/api/v1/homework',
       {
         student_fullname: fullName,
         content: answer,
@@ -81,8 +84,8 @@ const submitHomework = (
 
 const gradeHomework = (
   id,
-  fullName,
   answer,
+  fullName,
   submitDate,
   grade,
   comments,
@@ -90,10 +93,29 @@ const gradeHomework = (
 ) => {
   return axios
     .put(
-      '/api/v1/homework/' + id.toString(),
+      'https://radiant-inlet-12251.herokuapp.com/api/v1/homework/' +
+        id.toString(),
       {
         student_fullname: fullName,
         content: answer,
+        grade: grade,
+        comments: comments,
+        homework_page_id: hwPageID,
+      },
+      { headers: authHeader() }
+    )
+    .then((response) => {
+      return response.data
+    })
+}
+
+const updateHomework = (id, content, grade, comments, hwPageID) => {
+  return axios
+    .put(
+      'https://radiant-inlet-12251.herokuapp.com/api/v1/homework/' +
+        id.toString(),
+      {
+        content: content,
         grade: grade,
         comments: comments,
         homework_page_id: hwPageID,
@@ -110,4 +132,5 @@ export default {
   fetchHomeworkPage,
   submitHomework,
   gradeHomework,
+  updateHomework,
 }

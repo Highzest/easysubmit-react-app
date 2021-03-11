@@ -2,87 +2,94 @@ import { Redirect, useHistory, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 
+import { CREATE_QUIZ } from '../actions/types'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
+import { Link } from 'react-router-dom'
+import Parser from 'html-react-parser'
 import authHeader from '../services/auth-header'
 import axios from 'axios'
 
 const ViewQuizzes = () => {
   const { randomStr } = useParams()
-  const history = useHistory()
+
   const role = useSelector((state) => state.auth.role)
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
   const dispatch = useDispatch()
-  const [id, setId] = useState(null)
-  const [graded, setGraded] = useState(false)
   const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [files, setFiles] = useState([])
   const [closeDate, setCloseDate] = useState(new Date())
-  const [grade, setGrade] = useState('')
-  const [comments, setComments] = useState('')
-  const [hwPageID, setHwPageID] = useState(-1)
-  const [quizzes, setQuizzes] = useState([])
-
+  const [submissions, setSubmissions] = useState([])
+  const [quizPageID, setQuizPageID] = useState('')
+  const [description, setDescription] = useState('')
+  const [isLoading, setLoading] = useState(true)
+  console.log(submissions)
   useEffect(() => {
     axios
-      .get(`/api/v1/quiz-page/teacher/${randomStr}`, {
-        headers: authHeader(),
-      })
+      .get(
+        `https://radiant-inlet-12251.herokuapp.com/api/v1/quiz/teacher/${randomStr}`,
+        {
+          headers: authHeader(),
+        }
+      )
       .then((response) => {
         if (response.data) {
-          setHwPageID(response.data.id)
-          setQuizzes(response.data.quizzes)
+          setQuizPageID(response.data.id)
+          setSubmissions(response.data.quiz_submissions)
           setTitle(response.data.title)
-          setDescription(response.data.content)
           setCloseDate(response.data.closed_at)
+          setDescription(response.data.content)
+          setLoading(false)
         }
+        let responseQuestions = [
+          ...response.data.open_questions.map((q) => ({
+            ...q,
+            qType: 'open',
+          })),
+          ...response.data.true_false_questions.map((q) => ({
+            ...q,
+            qType: 'truefalse',
+          })),
+          ...response.data.multiple_choice_questions.map((q) => ({
+            ...q,
+            qType:
+              q.answer_choices.filter((q) => q.correct_answer === true).length >
+              1
+                ? 'multiple'
+                : 'single',
+            answer_choices: q.answer_choices.map((c) => {
+              const { correct_answer, ...newC } = c
+              return {
+                ...newC,
+              }
+            }),
+          })),
+        ]
+        dispatch({
+          type: CREATE_QUIZ,
+          payload: {
+            quiz_submissions: response.data.quiz_submissions,
+            questions: responseQuestions,
+          },
+        })
       })
-      .catch((response) => {
+      .catch((er) => {
         // history.push('/signin')
+        console.log(er.message)
       })
-  }, null)
+  }, [])
 
   const ckEditorRemoveTags = (data) => {
     const editedData = data.replace('<p>', '').replace('</p>', '')
     return editedData
   }
 
-  const handleGrade = (idx, e) => {
-    e.preventDefault()
-
-    dispatch(
-      gradeQuiz(
-        this.state.quizzes[idx].id,
-        this.state.quizzes[idx].student_fullname,
-        this.state.quizzes[idx].content,
-        this.state.quizzes[idx].submitted_at,
-        this.state.grade,
-        this.state.comments,
-        this.state.hwPageID
-      )
-    )
-      .then(() => {
-        this.setState({
-          isGraded: true,
-          successful: true,
-        })
-        window.location.reload()
-      })
-      .catch(() => {
-        this.setState({
-          isGraded: false,
-          successful: false,
-        })
-      })
-  }
   if (isLoggedIn && role === 'student') {
     return <Redirect to='/' />
   }
 
   const data = ckEditorRemoveTags(description)
   const isEmptyDesc = description.trim() === ''
-  const submittedHWs = quizzes.length
+  const submittedQuizzes = submissions.length
 
   return (
     <div>
@@ -98,121 +105,57 @@ const ViewQuizzes = () => {
             <div className='flex flex-col w-3/4'>
               <h2 className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase'>
                 <strong>Quiz Title:</strong>{' '}
-                <span className='text-purple-900'>
-                  {/*title*/}Cell Structure
-                </span>
+                <span className='text-purple-900'>{title}</span>
               </h2>
               {isEmptyDesc ? null : (
-                <h2 className='block px-4 pt-1 mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase'>
+                <h2 className='block px-4 pt-1 mb-2 text-xs tracking-wide text-gray-700 '>
                   <strong>Description:</strong>
-                  <br></br> <span className='text-purple-900'>{data}</span>
+                  <br></br>{' '}
+                  <span className='text-purple-900'>{Parser(data)}</span>
                 </h2>
               )}
               <div className='flex flex-col ml-2 items '>
-                <div className='flex flex-col mb-2 border border-purple-700 rounded'>
-                  <div className='flex flex-col pb-2 items'>
-                    <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                      <strong>Student Name:</strong>{' '}
-                      <span className='text-purple-900'>Dariya Shakenova</span>
-                    </p>
-                    <p className='block px-4 pt-1 mb-2 text-xs tracking-wide text-gray-700'>
-                      <strong>Submitted at:</strong>{' '}
-                      <span className='text-purple-900'>2021-21-01 15:45</span>
-                    </p>
-                    <div className='flex flex-row mb-2'>
-                      <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                        <strong>Grade: </strong>
-                        <span className='text-purple-900'>12/20</span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                {quizzes.map((quiz, index) => (
-                  <div
-                    key={index}
-                    className='flex flex-col mb-2 border border-purple-700 rounded'
-                  >
-                    <div className='flex flex-col pb-2 items'>
-                      <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                        <strong>Student Name:</strong>{' '}
-                        <span className='text-purple-900'>
-                          {quiz.student_fullname}
-                        </span>
-                      </p>
-                      <p className='block px-4 pt-1 mb-2 text-xs tracking-wide text-gray-700'>
-                        <strong>Submitted at:</strong>{' '}
-                        <span className='text-purple-900'>
-                          {quiz.submitted_at}
-                        </span>
-                      </p>
-                      {quiz.content.trim() === '' ? null : (
+                <div className='flex flex-col mb-2 '>
+                  {submissions.map((sub, index) => (
+                    <div
+                      key={index}
+                      className='flex flex-col mb-2 border border-purple-700 rounded'
+                    >
+                      <div className='flex flex-col pb-2 items'>
                         <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                          <strong>Content:</strong>
-                          <br />{' '}
+                          <strong>Student Name:</strong>{' '}
                           <span className='text-purple-900'>
-                            {this.ckEditorRemoveTags(quiz.content)}
+                            {sub.student_fullname}
                           </span>
                         </p>
-                      )}
-                      {quiz.grade.trim() === '' ? (
-                        <form
-                          onSubmit={handleGrade.bind(this, index)}
-                          className='flex flex-col'
-                        >
-                          <div className='flex flex-row mb-2'>
-                            <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                              <strong>Grade: </strong>
-                            </p>
-                            <input
-                              value={grade}
-                              onChange={(e) => setGrade(e.target.value)}
-                              className='w-10 px-2 py-1 text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
-                              type='text'
-                              placeholder=''
-                            />
-                          </div>
-                          <div className='flex flex-row'>
-                            <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                              <strong>Comments: </strong>
-                            </p>
-                            <textarea
-                              value={comments}
-                              onChange={(e) => setComments(e.target.value)}
-                              className='px-2 py-1 text-xs leading-tight text-gray-700 border border-purple-400 rounded focus:outline-none focus:bg-white'
-                              type='text'
-                              placeholder=''
-                            />
-                            <br />
-                          </div>
-                          <div>
-                            <button
-                              type='submit'
-                              className='relative flex justify-center px-2 py-1 mt-2 mb-2 ml-4 text-sm font-medium leading-4 text-purple-200 transition duration-150 ease-in-out bg-purple-800 border border-transparent rounded-md hover:bg-purple-500 focus:outline-none'
-                            >
-                              Grade Quiz
+                        <p className='block px-4 pt-1 mb-2 text-xs tracking-wide text-gray-700'>
+                          <strong>Submitted at:</strong>{' '}
+                          <span className='text-purple-900'>
+                            {sub.submitted_at}
+                          </span>
+                        </p>
+                        <p className='block px-4 pt-1 mb-2 text-xs tracking-wide text-gray-700'>
+                          <strong>Score:</strong>{' '}
+                          <span className='text-purple-900'>{sub.score}</span>
+                        </p>
+                        <div className='flex flex-row justify-end'>
+                          <Link to={`/view-submission/${sub.id}`}>
+                            <button className='py-1 text-sm hover:bg-purple-500 mr-2  px-1 bg-purple-700 rounded text-purple-200 focus:outline-none hover:text-white '>
+                              View Submission
                             </button>
-                          </div>
-                        </form>
-                      ) : (
-                        <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
-                          <strong>Grade:</strong>
-                          <span className='text-purple-900'>{quiz.grade}</span>
-                          <strong>Comments:</strong>
-                          <span className='text-purple-900'>
-                            {quiz.comments}
-                          </span>
-                        </p>
-                      )}
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
             <div className='flex flex-col '>
               <p className='block px-4 pt-1 text-xs tracking-wide text-gray-700'>
                 <strong>
                   <span className='font-bold text-purple-800'>
-                    1{/*submittedHWs*/}
+                    {submittedQuizzes}
                   </span>{' '}
                   Quizzes Submitted
                 </strong>{' '}

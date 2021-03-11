@@ -12,20 +12,49 @@ const createQuiz = (
   questions
 ) => {
   const openQuestions = questions.filter((q) => q.qType === 'open')
-  const multipleChoiceQuestions = questions.filter(
-    (q) => q.qType === 'multiple'
-  )
-  const singleQuestions = questions.filter((q) => q.qType === 'single')
+  const multipleChoiceQuestions = questions.reduce((filtered, q) => {
+    if (q.qType === 'multiple') {
+      const { choices, qType, id, ...newQ } = q
+      return filtered.concat({
+        ...newQ,
+        answer_choices: q.choices.map((c) => {
+          const { id, ...newC } = c
+          return {
+            ...newC,
+            correct_answer: c.correct,
+          }
+        }),
+      })
+    }
+    return filtered
+  }, [])
+  const singleQuestions = questions.reduce((filtered, q) => {
+    if (q.qType === 'single') {
+      const { choices, qType, id, ...newQ } = q
+      return filtered.concat({
+        ...newQ,
+        answer_choices: q.choices.map((c) => {
+          const { id, ...newC } = c
+          return {
+            ...newC,
+            correct_answer: c.correct,
+          }
+        }),
+      })
+    }
+    return filtered
+  }, [])
   const trueFalseQuestions = questions.filter((q) => q.qType === 'truefalse')
+  console.log(multipleChoiceQuestions, singleQuestions)
   return axios
     .post(
-      '/api/v1/quiz',
+      'https://radiant-inlet-12251.herokuapp.com/api/v1/quiz',
       {
         title: title,
         content: content,
         course_title: courseTitle,
         opened_at: openDate.toJSON(),
-        closed_At: closeDate.toJSON(),
+        closed_at: closeDate.toJSON(),
         teacher_fullname: fullName,
         mode: mode,
         open_questions: openQuestions,
@@ -38,15 +67,47 @@ const createQuiz = (
       { headers: authHeader() }
     )
     .then((response) => {
+      localStorage.removeItem('teacherQuizLink')
+      localStorage.removeItem('studentQuizLink')
+
+      if (response.data) {
+        localStorage.setItem(
+          'teacherQuizLink',
+          JSON.stringify(response.data.teacher_link)
+        )
+        localStorage.setItem(
+          'studentQuizLink',
+          JSON.stringify(response.data.student_link)
+        )
+      }
+      return response.data
+    })
+}
+const gradeQuiz = (id, fullName, submitDate, grade, comments, quizPageID) => {
+  return axios
+    .put(
+      'https://radiant-inlet-12251.herokuapp.com/api/v1/quiz/' + id.toString(),
+      {
+        student_fullname: fullName,
+        grade: grade,
+        comments: comments,
+        quiz_page_id: quizPageID,
+      },
+      { headers: authHeader() }
+    )
+    .then((response) => {
       return response.data
     })
 }
 
 const fetchQuiz = (randomStr) => {
   return axios
-    .get(`/api/v1/quiz/student/${randomStr}`, {
-      headers: authHeader(),
-    })
+    .get(
+      `https://radiant-inlet-12251.herokuapp.com/api/v1/quiz/student/${randomStr}`,
+      {
+        headers: authHeader(),
+      }
+    )
     .then((response) => {
       const normalized = {
         ...response.data,
@@ -64,50 +125,25 @@ const fetchQuiz = (randomStr) => {
     })
 }
 
-const submitQuiz = (
-  fullName,
-  answer,
-  submitDate,
-  grade,
-  comments,
-  hwPageID
-) => {
+const submitQuiz = (fullName, studentAnswers, quiz_id) => {
+  let student_answers = studentAnswers.map((a) => {
+    if (a.type != 'single') {
+      return a
+    }
+
+    return {
+      type: 'multiple',
+      multiple_choice_question_id: a.single_question_id,
+      multiple_choice_answer: a.single_answer,
+    }
+  })
   return axios
     .post(
-      '/api/v1/quiz/submit',
+      'https://radiant-inlet-12251.herokuapp.com/api/v1/quiz/submission',
       {
         student_fullname: fullName,
-        content: answer,
-        submitted_at: submitDate,
-        grade: grade,
-        comments: comments,
-        homework_page_id: hwPageID,
-      },
-      { headers: authHeader() }
-    )
-    .then((response) => {
-      return response.data
-    })
-}
-
-const gradeQuiz = (
-  id,
-  fullName,
-  answer,
-  submitDate,
-  grade,
-  comments,
-  hwPageID
-) => {
-  return axios
-    .put(
-      '/api/v1/quiz/' + id.toString(),
-      {
-        student_fullname: fullName,
-        content: answer,
-        grade: grade,
-        comments: comments,
-        quiz_id: hwPageID,
+        student_answers: student_answers,
+        quiz_id: quiz_id,
       },
       { headers: authHeader() }
     )

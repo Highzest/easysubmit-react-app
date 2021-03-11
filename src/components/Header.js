@@ -30,7 +30,7 @@ const Header = () => {
                 <Link to='/'>
                   <button
                     type='button'
-                    onClick={() => dispatch(logout)}
+                    onClick={() => dispatch(logout())}
                     className='w-16 h-8 p-1 text-xs font-thin border-2 border-purple-100 rounded-lg focus:outline-none hover:text-purple-300 hover:border-purple-300'
                   >
                     Sign out

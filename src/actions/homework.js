@@ -4,6 +4,7 @@ import {
   FETCH_HOMEWORK,
   GRADE_HOMEWORK,
   SUBMIT_HOMEWORK,
+  UPDATE_HOMEWORK,
 } from './types'
 
 import HomeworkService from '../services/homework'
@@ -30,8 +31,11 @@ export const createHomeworkPage = (
   ).then((data) => {
     dispatch({
       type: CREATE_HOMEWORK,
-      payload: data,
-    })
+      payload: {
+        studentLink: data.student_link,
+        teacherLink: data.teacher_link,
+      },
+    }).then
     return Promise.resolve()
   })
 }
@@ -69,8 +73,8 @@ export const submitHomework = (
 }
 export const gradeHomework = (
   id,
-  fullName,
   answer,
+  fullName,
   submitDate,
   grade,
   comments,
@@ -78,15 +82,43 @@ export const gradeHomework = (
 ) => (dispatch) => {
   return HomeworkService.gradeHomework(
     id,
-    fullName,
     answer,
+    fullName,
     submitDate,
     grade,
     comments,
     hwPageID
   ).then((data) => {
     dispatch({
-      type: GRADE_HOMEWORK,
+      type: UPDATE_HOMEWORK,
+      payload: {
+        id,
+        isGraded: true,
+      },
+    })
+    return Promise.resolve()
+  })
+}
+
+export const updateHomework = (id, content, grade, comments, hwPageID) => (
+  dispatch
+) => {
+  return HomeworkService.updateHomework(
+    id,
+    content,
+    grade,
+    comments,
+    hwPageID
+  ).then((data) => {
+    dispatch({
+      type: UPDATE_HOMEWORK,
+      payload: {
+        id,
+        grade,
+        content,
+        comments,
+        homework_page_id: hwPageID,
+      },
     })
     return Promise.resolve()
   })
