@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import CheckButton from 'react-validation/build/button'
 import Form from 'react-validation/build/form'
 import Input from 'react-validation/build/input'
+import { LOGIN_SUCCESS } from '../actions/types'
 import { Redirect } from 'react-router-dom'
 import { clearMessage } from '../actions/message'
 import { login } from '../actions/auth'
@@ -36,9 +37,7 @@ const LoginForm = () => {
     form.current.validateAll()
 
     if (checkBtn.current.context._errors.length === 0) {
-      dispatch(login(email, password)).then(() => {
-        window.location.reload()
-      })
+      dispatch(login(email, password)).then(() => {})
 
       dispatch(clearMessage())
     }

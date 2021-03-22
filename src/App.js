@@ -49,7 +49,7 @@ function App() {
           <Route path='/teacher-hw-page' exact component={ViewHomeworks} />
           <Route path='/teacher-hw-page/:randomStr' component={ViewHomeworks} />
           <Route
-            path='/view-submission/:id'
+            path='/view-submission/:randomStr/:id'
             component={ViewStudentSubmission}
           />
         </Switch>

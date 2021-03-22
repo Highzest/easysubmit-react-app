@@ -1,5 +1,7 @@
 import {
   CREATE_SUBMISSION,
+  GRADE_SUBMISSION,
+  MARK_IS_CORRECT,
   UPDATE_ANSWER,
   UPDATE_SUBMISSION,
 } from '../actions/types'
@@ -67,6 +69,27 @@ export default function (state = initialState, action) {
               }
           }
         }),
+      }
+    case MARK_IS_CORRECT:
+      return {
+        ...state,
+        student_answers: state.student_answers.map((a, idx) => {
+          console.log(idx)
+          console.log(payload)
+          if (idx !== payload.idx) {
+            return a
+          }
+
+          return {
+            ...a,
+            is_correct: payload.isCorrect,
+          }
+        }),
+      }
+    case GRADE_SUBMISSION:
+      return {
+        ...state,
+        ...payload,
       }
     default:
       return state

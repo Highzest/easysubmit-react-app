@@ -1,7 +1,8 @@
+import { LOGIN_SUCCESS } from '../actions/types'
 import axios from 'axios'
 
 const register = (firstName, lastName, email, password, role) => {
-  return axios.post('/api/v1/signup', {
+  return axios.post('https://radiant-inlet-12251.herokuapp.com/api/v1/signup', {
     first_name: firstName,
     last_name: lastName,
     email,

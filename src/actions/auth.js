@@ -52,7 +52,7 @@ export const login = (email, password) => (dispatch) => {
     (data) => {
       dispatch({
         type: LOGIN_SUCCESS,
-        payload: { access_token: data.access_token },
+        payload: { ...data },
       })
 
       return Promise.resolve()

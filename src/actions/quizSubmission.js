@@ -1,5 +1,7 @@
 import {
   CREATE_SUBMISSION,
+  GRADE_SUBMISSION,
+  MARK_IS_CORRECT,
   SUBMIT_QUIZ,
   UPDATE_ANSWER,
   UPDATE_SUBMISSION,
@@ -31,4 +33,38 @@ export const submitQuiz = (fullName, studentAnswers, quiz_id) => (dispatch) => {
       return Promise.resolve()
     }
   )
+}
+
+export const markIsCorrect = ({ idx, isCorrect }) => ({
+  type: MARK_IS_CORRECT,
+  payload: { idx, isCorrect },
+})
+
+export const gradeSubmission = (
+  id,
+  grade,
+  comments,
+  submitted_at,
+  updated_at,
+  student_fullname,
+  student_id,
+  quiz_id,
+  student_answers
+) => (dispatch) => {
+  return QuizService.gradeSubmission(
+    id,
+    grade,
+    comments,
+    submitted_at,
+    updated_at,
+    student_fullname,
+    student_id,
+    quiz_id,
+    student_answers
+  ).then((data) => {
+    dispatch({
+      type: GRADE_SUBMISSION,
+    })
+    return Promise.resolve()
+  })
 }

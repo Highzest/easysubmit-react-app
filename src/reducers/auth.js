@@ -34,7 +34,7 @@ export default function (state = initialState, action) {
       return {
         ...state,
         isLoggedIn: true,
-        access_token: payload.access_token,
+        ...payload,
       }
     case LOGIN_FAIL:
       return {

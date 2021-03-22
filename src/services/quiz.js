@@ -152,9 +152,43 @@ const submitQuiz = (fullName, studentAnswers, quiz_id) => {
     })
 }
 
+const gradeSubmission = (
+  id,
+  grade,
+  comments,
+  submitted_at,
+  updated_at,
+  student_fullname,
+  student_id,
+  quiz_id,
+  student_answers
+) => {
+  return axios
+    .put(
+      'https://radiant-inlet-12251.herokuapp.com/api/v1/quiz/submission/' +
+        id.toString(),
+      {
+        id: id,
+        grade: grade,
+        comments: comments,
+        submitted_at: submitted_at,
+        updated_at: updated_at,
+        student_fullname: student_fullname,
+        student_id: student_id,
+        quiz_id: quiz_id,
+        student_answers: student_answers,
+      },
+      { headers: authHeader() }
+    )
+    .then((response) => {
+      return response.data
+    })
+}
+
 export default {
   createQuiz,
   fetchQuiz,
   submitQuiz,
   gradeQuiz,
+  gradeSubmission,
 }

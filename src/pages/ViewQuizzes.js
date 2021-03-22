@@ -12,7 +12,7 @@ import axios from 'axios'
 
 const ViewQuizzes = () => {
   const { randomStr } = useParams()
-
+  let score = 0
   const role = useSelector((state) => state.auth.role)
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
   const dispatch = useDispatch()
@@ -87,6 +87,15 @@ const ViewQuizzes = () => {
     return <Redirect to='/' />
   }
 
+  const countScore = (sub) => {
+    score = 0
+    sub.student_answers.map((s) => {
+      if (s.is_correct == true) {
+        score++
+      }
+    })
+    return score
+  }
   const data = ckEditorRemoveTags(description)
   const isEmptyDesc = description.trim() === ''
   const submittedQuizzes = submissions.length
@@ -136,10 +145,12 @@ const ViewQuizzes = () => {
                         </p>
                         <p className='block px-4 pt-1 mb-2 text-xs tracking-wide text-gray-700'>
                           <strong>Score:</strong>{' '}
-                          <span className='text-purple-900'>{sub.score}</span>
+                          <span className='text-purple-900'>
+                            {countScore(sub)}
+                          </span>
                         </p>
                         <div className='flex flex-row justify-end'>
-                          <Link to={`/view-submission/${sub.id}`}>
+                          <Link to={`/view-submission/${randomStr}/${sub.id}`}>
                             <button className='py-1 text-sm hover:bg-purple-500 mr-2  px-1 bg-purple-700 rounded text-purple-200 focus:outline-none hover:text-white '>
                               View Submission
                             </button>
